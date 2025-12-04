@@ -18,12 +18,14 @@ class ProductController extends Controller
     // Lista de tortas (visible para todos los logueados: cliente/admin)
     public function index()
     {
-        $products = Product::with('category')
-            ->where('is_active', true)
+        $products = Product::where('is_active', true)
+            ->with('category')
+            ->orderBy('name')
             ->get();
 
         return response()->json($products);
     }
+
 
     // Ver una torta específica
     public function show(Product $product)

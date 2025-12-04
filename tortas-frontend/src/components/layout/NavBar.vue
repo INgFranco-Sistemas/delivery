@@ -17,12 +17,12 @@
       <!-- Desktop nav -->
       <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
         <RouterLink
-          v-if="isAuthenticated"
           :to="{ name: 'home' }"
           :class="linkClass('home')"
         >
           Inicio
         </RouterLink>
+
 
         <RouterLink
           v-if="isAuthenticated && !isAdmin"

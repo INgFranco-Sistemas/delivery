@@ -91,17 +91,31 @@
       </article>
     </section>
   </div>
+
+  <div
+    v-if="feedback"
+    class="fixed bottom-4 right-4 z-40 bg-slate-900 text-white text-xs px-4 py-2 rounded-full shadow-soft flex items-center gap-2"
+  >
+    <span>🧁</span>
+    <span>{{ feedback }}</span>
+  </div>
+  <!-- 👆👆 HASTA AQUÍ -->
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useProductsStore } from '@/stores/products';
 import { useCartStore } from '@/stores/cart';
+import { useAuthStore } from '@/stores/auth';
 
 const productsStore = useProductsStore();
 const cartStore = useCartStore();
+const auth = useAuthStore();
+const router = useRouter();
 
 const search = ref('');
+const feedback = ref('');   // 👈 aquí guardamos el mensaje flotante
 
 const loading = computed(() => productsStore.loading);
 const error = computed(() => productsStore.error);
@@ -123,12 +137,36 @@ const filteredCakes = computed(() => {
   });
 });
 
+// 👇 ESTA FUNCIÓN ES LA QUE FALTABA
+const showFeedback = (msg) => {
+  feedback.value = msg;
+  setTimeout(() => {
+    if (feedback.value === msg) {
+      feedback.value = '';
+    }
+  }, 1800);
+};
+
 const addToCart = (cake) => {
+  // si NO está logueado -> redirigir a login
+  if (!auth.isAuthenticated) {
+    showFeedback('Debes iniciar sesión para añadir al carrito');
+    router.push({
+      name: 'login',
+      query: { redirect: '/' }, // o route.fullPath si quieres volver a esa página exacta
+    });
+    return;
+  }
+
+  // si está logueado -> añadir normal
   cartStore.addItem(cake);
+  showFeedback('Añadido al carrito');
 };
 
 onMounted(() => {
+  // Siempre recargamos productos al entrar al Home
   productsStore.fetchProducts();
 });
 </script>
+
 

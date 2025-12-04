@@ -17,7 +17,12 @@ const routes = [
   { path: '/login', name: 'login', component: LoginView, meta: { guest: true } },
   { path: '/register', name: 'register', component: RegisterView, meta: { guest: true } },
 
-  { path: '/', name: 'home', component: HomeView, meta: { requiresAuth: true } },
+  { 
+    path: '/',
+    name: 'home', 
+    component: HomeView, 
+    //meta: { requiresAuth: true } 
+  },
   { path: '/cart', name: 'cart', component: CartView, meta: { requiresAuth: true } },
   { path: '/orders', name: 'orders', component: MyOrdersView, meta: { requiresAuth: true } },
 
@@ -40,26 +45,19 @@ const router = createRouter({
 });
 
 // Guardas de navegación
-router.beforeEach(async (to, from, next) => {
+router.beforeEach((to, from, next) => {
   const auth = useAuthStore();
 
-  if (!auth.user && auth.token) {
-    await auth.fetchMe();
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    return next({ name: 'login', query: { redirect: to.fullPath } });
   }
 
   if (to.meta.guest && auth.isAuthenticated) {
     return next({ name: 'home' });
   }
 
-  if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    return next({ name: 'login' });
-  }
-
-  if (to.meta.admin && !auth.isAdmin) {
-    return next({ name: 'home' });
-  }
-
-  return next();
+  next();
 });
+
 
 export default router;
