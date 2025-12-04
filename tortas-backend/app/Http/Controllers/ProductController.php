@@ -33,44 +33,51 @@ class ProductController extends Controller
         return response()->json($product);
     }
 
-    // Crear nueva torta (admin)
     public function store(Request $request)
     {
-        $this->authorizeAdmin();
-
         $data = $request->validate([
-            'category_id' => 'required|exists:categories,id',
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
             'price'       => 'required|numeric|min:0',
             'stock'       => 'required|integer|min:0',
+            'category_id' => 'required|exists:categories,id',
             'is_active'   => 'boolean',
-            'image_path'  => 'nullable|string', // luego la cambiaremos a upload real
+            'image'       => 'nullable|image|max:2048', // 2MB
         ]);
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('products', 'public');
+            $data['image_path'] = $path;
+        }
 
         $product = Product::create($data);
 
-        return response()->json($product, 201);
+        return response()->json($product->load('category'), 201);
     }
 
-    // Actualizar torta (admin)
     public function update(Request $request, Product $product)
     {
-        $this->authorizeAdmin();
-
         $data = $request->validate([
-            'category_id' => 'sometimes|exists:categories,id',
-            'name'        => 'sometimes|string|max:255',
+            'name'        => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
-            'price'       => 'sometimes|numeric|min:0',
-            'stock'       => 'sometimes|integer|min:0',
+            'price'       => 'sometimes|required|numeric|min:0',
+            'stock'       => 'sometimes|required|integer|min:0',
+            'category_id' => 'sometimes|required|exists:categories,id',
             'is_active'   => 'boolean',
-            'image_path'  => 'nullable|string',
+            'image'       => 'nullable|image|max:2048',
         ]);
+
+        if ($request->hasFile('image')) {
+            // opcional: borrar imagen anterior
+            // if ($product->image_path) Storage::disk('public')->delete($product->image_path);
+
+            $path = $request->file('image')->store('products', 'public');
+            $data['image_path'] = $path;
+        }
 
         $product->update($data);
 
-        return response()->json($product);
+        return response()->json($product->fresh()->load('category'));
     }
 
     // Eliminar torta (admin)

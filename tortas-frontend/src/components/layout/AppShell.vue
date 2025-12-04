@@ -1,13 +1,18 @@
 <template>
   <div class="max-w-6xl mx-auto px-4 py-6">
-    <div class="grid gap-6 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] items-start">
+    <div
+  :class="[
+    'max-w-6xl mx-auto px-4 py-5 grid gap-6',
+    isAdminRoute ? 'lg:grid-cols-1' : 'lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1.1fr)]'
+  ]"
+>
       <!-- Contenido principal -->
       <section class="bg-white/80 rounded-3xl shadow-soft p-5 md:p-7 border border-pastel-pink/20">
         <slot />
       </section>
 
       <!-- Panel decorativo / promo -->
-      <aside class="hidden md:block">
+      <aside  v-if="!isAdminRoute" class="hidden md:block">
         <div class="bg-gradient-to-br from-pastel-pink via-pastel-cream to-pastel-mint rounded-3xl h-full p-6 flex flex-col justify-between shadow-soft border border-white/60">
           <div>
             <h2 class="font-display text-2xl font-semibold text-slate-800 mb-2">
@@ -42,4 +47,13 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+
+// Cualquier ruta cuyo name empiece por "admin-" la tomamos como panel admin
+const isAdminRoute = computed(() =>
+  typeof route.name === 'string' && route.name.startsWith('admin-')
+);
 </script>

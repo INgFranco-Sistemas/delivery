@@ -40,9 +40,19 @@
         class="bg-white/90 border border-pastel-pink/20 rounded-2xl overflow-hidden flex flex-col shadow hover:shadow-soft hover:-translate-y-0.5 transition-all"
       >
         <div
-          class="relative h-32 bg-gradient-to-br from-pastel-pink via-pastel-cream to-pastel-mint flex items-center justify-center"
+          class="relative h-32 bg-gradient-to-br from-pastel-pink via-pastel-cream to-pastel-mint flex items-center justify-center overflow-hidden"
         >
-          <span class="text-5xl">🎂</span>
+          <template v-if="cake.image_url">
+            <img
+              :src="cake.image_url"
+              :alt="cake.name"
+              class="h-full w-full object-cover"
+            />
+          </template>
+          <template v-else>
+            <span class="text-5xl">🎂</span>
+          </template>
+
           <div
             class="absolute top-2 left-2 bg-white/80 rounded-full px-2 py-0.5 text-[10px] font-semibold text-pastel-rose"
           >
@@ -118,9 +128,7 @@ const addToCart = (cake) => {
 };
 
 onMounted(() => {
-  if (!productsStore.products.length) {
-    productsStore.fetchProducts();
-  }
+  productsStore.fetchProducts();
 });
 </script>
 
